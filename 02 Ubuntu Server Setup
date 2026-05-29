@@ -1,0 +1,65 @@
+02 — Ubuntu Server VM Setup
+What is this VM for?
+This Ubuntu Server VM is the main workhorse of the homelab. It runs Docker, which hosts all the self-hosted services (Pi-hole, Portainer, etc.) as containers.
+
+Downloading the ISO
+
+In the Proxmox web UI, navigate to local (pve) → ISO Images
+Click Download from URL and paste:
+
+   https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso
+
+Click Query URL then Download — Proxmox downloads it directly, nothing touches your local machine
+
+
+Creating the VM
+
+Click Create VM in the top right of the Proxmox UI
+Use these settings:
+
+Name ubuntu-server 
+OS Select the Ubuntu ISO downloaded above 
+SystemLeave default
+(SeaBIOS) Disk32GB+ on local-lvm 
+CPU 2 cores
+Memory2048 MB (2GB) 
+Network vmbr0 (default bridge)
+
+Click Finish — don't start it yet, review the summary first
+
+
+Installing Ubuntu Server
+
+Start the VM and click Console in Proxmox to open the display
+Work through the installer:
+
+
+Installation type: Ubuntu Server (not minimized)
+Network: Leave as default DHCP
+Storage: Use the entire disk, keep LVM enabled
+Profile: Set your username and password
+OpenSSH: Enable Install OpenSSH Server — critical for remote access
+Featured Snaps: Skip all, install nothing here
+
+
+Wait for the install to complete, then reboot when prompted
+
+
+First Boot
+Once the VM reboots, log in via the Proxmox console and get the VM's IP:
+baship a
+Look for the 10.0.0.x address on the ens18 (or similar) interface.
+
+SSH In From Mac
+From this point on, manage the VM entirely from Terminal on your Mac — no need to use the Proxmox console.
+bashssh yourusername@10.0.0.x
+Accept the fingerprint prompt the first time. You're in!
+
+Update the System
+First thing after logging in:
+bashsudo apt update && sudo apt upgrade -y
+
+Verify it Appears on the Network
+From your computer, confirm the VM shows up on the local network:
+arp -a
+It should appear as a separate device from the Proxmox host.
