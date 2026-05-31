@@ -1,0 +1,90 @@
+06 — Splunk SIEM Setup
+
+What is this for?
+Splunk is a SIEM (Security Information and Event Management) platform. It collects, indexes, and searches log data from across the homelab. This allows you to monitor security events, investigate incidents, and practice real SOC (Security Operations Center) skills. Splunk is installed directly on its own dedicated Ubuntu Server VM.
+
+Prerequisites
+A second Ubuntu Server VM is set up (see 02 Ubuntu Server Setup)
+The VM has at least 4GB RAM and 30GB disk — Splunk is resource heavy
+You are SSH'd into the second Ubuntu Server VM
+
+Downloading Splunk Enterprise
+Go to https://www.splunk.com and create a free account if you do not have one
+Navigate to Products → Free Trials & Downloads → Splunk Enterprise
+Select the Linux .deb package and copy the wget download link
+
+On your VM, download Splunk:
+
+   wget -O splunk.deb 'paste-your-download-link-here'
+
+Installing Splunk
+Install the package:
+
+   sudo dpkg -i splunk.deb
+
+Start Splunk and accept the license:
+
+   sudo /opt/splunk/bin/splunk start --accept-license
+
+On first start it will ask you to create an admin username and password — remember these.
+
+Enable Splunk to Start on Boot
+
+   sudo /opt/splunk/bin/splunk enable boot-start
+
+Accessing Splunk
+Open a browser and navigate to:
+
+   http://10.0.0.x:8000
+
+Replace 10.0.0.x with the IP of your Splunk VM.
+Log in with the admin credentials you created during install.
+
+Setting Up Log Ingestion
+Splunk collects logs via Universal Forwarders installed on other machines, or by monitoring local log files.
+
+Adding a Receiving Port (on Splunk server)
+In the Splunk web UI go to Settings → Forwarding and Receiving
+Under Receive Data click Configure Receiving → New Receiving Port
+Set the port to 9997 and save
+
+Installing the Universal Forwarder on DarwinPC (Windows)
+Download the Universal Forwarder from https://www.splunk.com/en_us/download/universal-forwarder.html
+Run the installer and select:
+   Deployment Server    leave blank
+   Receiving Indexer    10.0.0.x port 9997 (your Splunk VM IP)
+During install select which Windows logs to forward (Security, System, Application)
+
+Installing the Universal Forwarder on Ubuntu Server VM
+On your first Ubuntu Server VM, run:
+
+   wget -O splunkforwarder.deb 'paste-your-forwarder-download-link-here'
+   sudo dpkg -i splunkforwarder.deb
+   sudo /opt/splunkforwarder/bin/splunk start --accept-license
+   sudo /opt/splunkforwarder/bin/splunk add forward-server 10.0.0.x:9997 -auth admin:yourpassword
+   sudo /opt/splunkforwarder/bin/splunk add monitor /var/log/auth.log -index main -sourcetype auth
+   sudo /opt/splunkforwarder/bin/splunk enable boot-start
+
+Replace 10.0.0.x with your Splunk VM IP and yourpassword with your Splunk admin password.
+
+Verifying Data is Coming In
+In the Splunk web UI go to Search & Reporting
+Run the following search:
+
+   index=main | stats count by host
+
+You should see your hosts (DarwinPC, ubuntuserver) listed with event counts.
+
+Searching Logs
+Basic search for failed Windows logins:
+
+   index=main EventCode=4625
+
+Search for SSH activity on the Ubuntu server:
+
+   index=main source="/var/log/auth.log"
+
+Search for all critical events in the last 24 hours:
+
+   index=main earliest=-24h | stats count by EventCode, host
+
