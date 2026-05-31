@@ -1,0 +1,77 @@
+03 — Portainer Setup
+
+What is this for?
+Portainer is a web-based Docker management UI. It runs as a container itself and lets you manage all other containers, images, volumes, and networks from a browser instead of the command line.
+
+Prerequisites
+Ubuntu Server VM is running and you are SSH'd in
+Docker is installed (see below if not)
+
+Installing Docker
+If Docker is not already installed on the VM, run:
+
+   sudo apt update
+   sudo apt install -y ca-certificates curl gnupg
+   sudo install -m 0755 -d /etc/apt/keyrings
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+   sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+   echo \
+     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+     https://download.docker.com/linux/ubuntu \
+     $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+   sudo apt update
+   sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+Verify Docker is running:
+
+   sudo systemctl status docker
+
+Add your user to the Docker group so you don't need sudo every time:
+
+   sudo usermod -aG docker $USER
+   newgrp docker
+
+Creating the Portainer Volume
+Portainer needs a persistent volume to store its data:
+
+   docker volume create portainer_data
+
+Running Portainer
+Deploy Portainer as a container:
+
+   docker run -d \
+     -p 8000:8000 \
+     -p 9443:9443 \
+     --name portainer \
+     --restart=always \
+     -v /var/run/docker.sock:/var/run/docker.sock \
+     -v portainer_data:/data \
+     portainer/portainer-ce:latest
+
+Flags explained:
+-p 9443:9443    HTTPS web UI port
+-p 8000:8000    Agent tunnel port
+--restart=always    Portainer starts automatically on reboot
+-v /var/run/docker.sock    Gives Portainer access to manage Docker
+
+Accessing Portainer
+Open a browser and navigate to:
+
+   https://10.0.0.x:9443
+
+Replace 10.0.0.x with your Ubuntu Server VM's IP address.
+You will get a browser warning about the certificate — this is expected, click Advanced and proceed.
+
+First Time Setup
+Create an admin username and password when prompted
+Select Get Started to manage the local Docker environment
+You should see the local environment appear on the home screen
+
+Verify It is Working
+You should see the Portainer dashboard with your local Docker environment
+The container list should show the Portainer container itself running
+From this point on, you can deploy and manage all other containers from the Portainer UI
+
