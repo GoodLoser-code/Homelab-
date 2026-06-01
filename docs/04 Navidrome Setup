@@ -1,0 +1,69 @@
+04 — Navidrome Setup
+
+What is this for?
+Navidrome is a self-hosted music streaming server. It indexes your music library and lets you stream your music from anywhere using apps like Substreamer on your phone. It is accessed remotely via Tailscale when off the home network.
+
+Prerequisites
+Portainer is running on the Ubuntu Server VM
+Your music files are stored somewhere accessible on the VM (e.g. /home/yourusername/music)
+
+Creating the Music Folder
+If you do not already have a music folder, create one:
+
+   mkdir -p ~/music
+
+Place your music files in this folder. Navidrome supports MP3, FLAC, AAC, OGG, and most common formats.
+
+Deploying Navidrome in Portainer
+Open Portainer at https://10.0.0.x:9443
+Go to Stacks → Add Stack
+Name it navidrome
+Paste the following into the Web editor:
+
+   version: "3"
+   services:
+     navidrome:
+       image: deluan/navidrome:latest
+       container_name: navidrome
+       restart: unless-stopped
+       ports:
+         - "4533:4533"
+       environment:
+         ND_SCANSCHEDULE: 1h
+         ND_LOGLEVEL: info
+         ND_SESSIONTIMEOUT: 24h
+         ND_BASEURL: ""
+       volumes:
+         - "/home/yourusername/navidrome/data:/data"
+         - "/home/yourusername/music:/music:ro"
+
+Replace yourusername with your actual Ubuntu username.
+The :ro at the end of the music volume means read-only — Navidrome will never modify your files.
+
+Click Deploy the stack
+
+Accessing Navidrome
+Open a browser and navigate to:
+
+   http://10.0.0.x:4533
+
+First Time Setup
+Create an admin username and password when prompted
+Navidrome will automatically scan your music folder
+Wait for the scan to complete — you will see your library populate
+Log in and verify your music library appears correctly
+
+Connecting Substreamer on iPhone
+Substreamer uses the Subsonic API that Navidrome supports natively.
+
+Install Substreamer from the App Store
+Open Substreamer and go to Settings → Add Server
+Enter the following:
+   Server URL    http://10.0.0.x:4533  (on home network)
+                 http://100.x.x.x:4533 (via Tailscale when away from home)
+   Username      your Navidrome admin username
+   Password      your Navidrome admin password
+Tap Test Connection to verify it works
+
+Note: The Tailscale IP (100.x.x.x) is used when you are not on your home network. See the Tailscale setup doc for details.
+

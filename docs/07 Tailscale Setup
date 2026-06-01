@@ -1,0 +1,59 @@
+07 — Tailscale Setup
+
+What is this for?
+Tailscale creates a private VPN mesh network between all your devices. It allows you to securely access your homelab services (like Navidrome) from anywhere without opening ports on your router or setting up a traditional VPN. Each device gets a stable 100.x.x.x IP address that works regardless of location.
+
+Prerequisites
+A free Tailscale account — sign up at https://tailscale.com
+The Ubuntu Server VM (running Navidrome) is up and accessible on your local network
+
+Installing Tailscale on the Ubuntu Server VM
+SSH into your Ubuntu Server VM and run:
+
+   curl -fsSL https://tailscale.com/install.sh | sh
+
+Start Tailscale and authenticate:
+
+   sudo tailscale up
+
+A URL will appear in the terminal — open it in your browser and log in to your Tailscale account to authorize the machine.
+
+Get the VM's Tailscale IP:
+
+   tailscale ip -4
+
+It will return a 100.x.x.x address — note this down, you will use it to connect remotely.
+
+Enable Tailscale to Start on Boot
+
+   sudo systemctl enable tailscaled
+
+Installing Tailscale on Your iPhone
+Install Tailscale from the App Store
+Open the app and sign in with the same account you used above
+Tap the toggle to connect
+Your phone is now on the same private network as your homelab
+
+Installing Tailscale on Your Computer (Optional)
+Download from https://tailscale.com/download
+Install and sign in with the same account
+Your computer will also be able to reach 100.x.x.x addresses
+
+Verify Devices Are Connected
+In a browser go to https://login.tailscale.com/admin/machines
+You should see all your connected devices listed with their 100.x.x.x addresses
+All devices on the same Tailscale account can reach each other regardless of physical location
+
+Accessing Navidrome Remotely
+Once Tailscale is running on both the Ubuntu Server VM and your iPhone, open Substreamer and use the Tailscale IP instead of your local IP:
+
+   Server URL    http://100.x.x.x:4533
+
+Replace 100.x.x.x with the Tailscale IP of your Ubuntu Server VM (from the tailscale ip -4 command above).
+
+This works over cellular data or any Wi-Fi network — Tailscale handles routing automatically.
+
+How it Works
+Without Tailscale    You would need to open a port on your router and expose Navidrome to the internet
+With Tailscale       Traffic stays private within your Tailscale network, nothing is exposed publicly
+

@@ -1,0 +1,69 @@
+05 — Pi-hole Setup
+
+What is this for?
+Pi-hole is a network-wide ad blocker that acts as a DNS server for your home network. Instead of blocking ads on a per-device basis, all DNS queries on your network go through Pi-hole first. It blocks known ad and tracking domains before they ever reach your devices.
+
+Prerequisites
+Portainer is running on the Ubuntu Server VM
+The Ubuntu Server VM has a static IP or a DHCP reservation set on your router
+
+Setting a Static IP (Recommended)
+Pi-hole works best when the host machine always has the same IP address.
+The easiest way is to set a DHCP reservation on your router — assign the Ubuntu Server VM's MAC address a fixed IP (e.g. 10.0.0.x).
+
+Deploying Pi-hole in Portainer
+Open Portainer at https://10.0.0.x:9443
+Go to Stacks → Add Stack
+Name it pihole
+Paste the following into the Web editor:
+
+   version: "3"
+   services:
+     pihole:
+       image: pihole/pihole:latest
+       container_name: pihole
+       restart: unless-stopped
+       ports:
+         - "53:53/tcp"
+         - "53:53/udp"
+         - "80:80/tcp"
+       environment:
+         TZ: America/New_York
+         WEBPASSWORD: yourpasswordhere
+       volumes:
+         - "/home/yourusername/pihole/etc-pihole:/etc/pihole"
+         - "/home/yourusername/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
+       dns:
+         - 127.0.0.1
+         - 1.1.1.1
+
+Replace yourpasswordhere with a strong password for the Pi-hole web UI.
+Replace yourusername with your actual Ubuntu username.
+Replace America/New_York with your timezone if different.
+
+Click Deploy the stack
+
+Accessing Pi-hole
+Open a browser and navigate to:
+
+   http://10.0.0.x/admin
+
+Log in with the password you set in WEBPASSWORD.
+
+Pointing Your Network to Pi-hole
+For Pi-hole to block ads network-wide, your devices need to use it as their DNS server.
+
+Option 1 — Router DNS (Recommended, covers all devices)
+Log in to your router admin page
+Find the DNS settings (usually under LAN or DHCP settings)
+Set the Primary DNS to your Ubuntu Server VM's IP (e.g. 10.0.0.x)
+Save and reboot the router
+
+Option 2 — Per device
+Manually set DNS to 10.0.0.x on each device you want covered
+
+Verify It is Working
+Open the Pi-hole dashboard at http://10.0.0.x/admin
+You should start seeing DNS queries appear on the dashboard within a few minutes
+The Total Queries and Queries Blocked counters should increase as devices on your network browse the web
+
