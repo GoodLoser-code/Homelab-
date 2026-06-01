@@ -60,12 +60,12 @@ graph TD
 ## Documentation
 
 - [01 Proxmox Setup](docs/01%20Proxmox-setup.md)
-- [02 Ubuntu Server Setup](docs/02%20Ubuntu%20Server%20Setup.md)
-- [03 Portainer Setup](docs/03%20Portainer%20Setup.md)
-- [04 Navidrome Setup](docs/04%20Navidrome%20Setup.md)
-- [05 Pi-hole Setup](docs/05%20Pi-hole%20Setup.md)
-- [06 Splunk SIEM Setup](docs/06%20Splunk%20SIEM%20Setup.md)
-- [07 Tailscale Setup](docs/07%20Tailscale%20Setup.md)
+- [02 Ubuntu Server Setup](docs/02%20Ubuntu%20Server%20Setup)
+- [03 Portainer Setup](docs/03%20Portainer%20setup)
+- [04 Navidrome Setup](docs/04%20Navidrome%20Setup)
+- [05 Pi-hole Setup](docs/05%20Pi-hole%20Setup)
+- [06 Splunk SIEM Setup](docs/06%20Splunk%20SIEM%20Setup)
+- [07 Tailscale Setup](docs/07%20Tailscale%20Setup)
 
 ---
 
